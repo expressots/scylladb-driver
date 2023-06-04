@@ -2,7 +2,7 @@ use crate::session::scylla_session::ScyllaSession;
 
 use super::cluster_config::ClusterConfig;
 
-#[napi]
+#[napi(js_name = "Cluster")]
 struct ScyllaCluster {
   uri: String,
 }
