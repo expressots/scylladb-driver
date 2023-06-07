@@ -3,7 +3,7 @@ import test from "ava";
 import { Uuid } from "../index.js";
 
 test("Create a random UUID", (t) => {
-  const uuid = Uuid.randomUuid();
+  const uuid = Uuid.randomUuidv4();
   t.is(uuid.toString().length, 36);
 });
 
