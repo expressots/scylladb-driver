@@ -1,4 +1,8 @@
+use napi::bindgen_prelude::Either3;
+use scylla::_macro_internal::SerializedValues;
 use scylla::frame::response::result::ColumnType;
+
+use crate::types::uuid::Uuid;
 
 #[napi]
 pub struct ScyllaSession {
@@ -12,10 +16,34 @@ impl ScyllaSession {
   }
 
   #[napi]
-  pub async fn execute(&self, query: String) -> serde_json::Value {
-    let query_result = self.session.query(query, &[]).await.unwrap();
+  pub async fn execute(
+    &self,
+    query: String,
+    parameters: Option<Vec<Either3<u32, String, &Uuid>>>,
+  ) -> serde_json::Value {
+    let query_result = if let Some(parameters) = parameters {
+      let mut values = SerializedValues::with_capacity(parameters.len());
+
+      for parameter in parameters {
+        match parameter {
+          Either3::A(number) => values.add_value(&(number as i32)).unwrap(),
+          Either3::B(str) => values.add_value(&str).unwrap(),
+          Either3::C(uuid) => values.add_value(&(uuid.value())).unwrap(),
+        }
+      }
+
+      self.session.query(query.clone(), values).await
+    } else {
+      self.session.query(query.clone(), &[]).await
+    }
+    .unwrap();
 
     // If no rows were found return an empty array
+    if query_result.result_not_rows().is_ok() {
+      return serde_json::json!([]);
+    }
+
+    // Empty results
     if query_result.rows.is_none() {
       return serde_json::json!([]);
     }
@@ -29,8 +57,10 @@ impl ScyllaSession {
       let mut row_object = serde_json::Map::new();
 
       for (i, column) in row.columns.iter().enumerate() {
-        let column = column.clone().unwrap();
         let column_name = column_specs[i].name.clone();
+        let column = column
+          .clone()
+          .unwrap_or_else(|| panic!("Column {} is null in query {}", column_name, query.clone()));
 
         let column_value = match column_specs[i].typ {
           ColumnType::Ascii => serde_json::Value::String(column.as_ascii().unwrap().to_string()),
