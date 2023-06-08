@@ -1,9 +1,29 @@
 use napi::Result as NapiResult;
 
 /// `Uuid` and `Timeuuid` are represented through this type.
+#[derive(Debug)]
 #[napi]
-struct Uuid {
-  value: uuid::Uuid,
+pub struct Uuid {
+  pub(crate) value: uuid::Uuid,
+}
+
+impl Uuid {
+  /// Returns the underlying `uuid::Uuid` value.
+  pub fn value(&self) -> uuid::Uuid {
+    self.value
+  }
+}
+
+impl From<uuid::Uuid> for Uuid {
+  fn from(value: uuid::Uuid) -> Self {
+    Self { value }
+  }
+}
+
+impl From<Uuid> for uuid::Uuid {
+  fn from(value: Uuid) -> Self {
+    value.value
+  }
 }
 
 #[napi]
@@ -18,7 +38,7 @@ impl Uuid {
 
   /// Parses a UUID from a string. It may fail if the string is not a valid UUID.
   #[napi]
-  pub fn from_string(str: String) -> NapiResult<String> {
+  pub fn from_string(str: String) -> NapiResult<Uuid> {
     let uuid = uuid::Uuid::parse_str(&str).map_err(|e| {
       napi::Error::new(
         napi::Status::GenericFailure,
@@ -26,7 +46,7 @@ impl Uuid {
       )
     })?;
 
-    Ok(uuid.to_string())
+    Ok(Self { value: uuid })
   }
 
   /// Returns the string representation of the UUID.
