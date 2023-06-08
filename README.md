@@ -28,31 +28,31 @@ Installation through npm is recommended::
 
     $ npm i scylladb-driver
 
-For more complete installation instructions, see the official documentation at `installation guide <http://>`_.
+For more complete installation instructions, see the official documentation at `installation guide <http://>`.
 
 Documentation
 -------------
 
-The official documentation can be found `here <http://>`_.
+The official documentation can be found `here <http://>`.
 
 Information includes:
 
-* `How to instal and use scylladb driver <http://>`_
-* `Getting started guide <http://>`_
-* `API docs <http://python-driver.docs.scylladb.com/stable/api/index.html>`_
-* `Performance tips <http://>`_
-* `Development roadmap <http://>`_
+* `How to instal and use scylladb driver <http://>`
+* `Getting started guide <http://>`
+* `API docs <http://`
+* `Performance tips <http://>`
+* `Development roadmap <http://>`
 
 Contributing
 ------------
 
-See `CONTRIBUTING <https://>`_.
+See `CONTRIBUTING <https://>`.
 
 Report Issues
 ------------------
 
-Please report any bugs and make any feature requests by clicking the New Issue button in 
-`Github <https://github.com/scylladb/python-driver/issues>`_.
+Please report an issue or request a feature by clicking here 
+`Github Issue <https://>`.
 
 If you would like to contribute, please feel free to send a pull request.
 
@@ -63,4 +63,3 @@ Your best chances for getting quick support is either open an issue or ask a que
 
 License
 -------
-
