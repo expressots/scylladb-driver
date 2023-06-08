@@ -10,7 +10,9 @@
   "license": "MIT",
   "devDependencies": {
     "@napi-rs/cli": "^2.16.1",
-    "ava": "^5.1.1"
+    "ava": "^5.1.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.1.3"
   },
   "ava": {
     "timeout": "3m"
@@ -21,7 +23,9 @@
   "scripts": {
     "artifacts": "napi artifacts",
     "build": "napi build --platform --release",
+    "postbuild": "node ./post_build.js",
     "build:debug": "napi build --platform",
+    "dev": "tsnd --respawn --transpile-only --no-notify ./driver_api/main.ts",
     "prepublishOnly": "napi prepublish -t npm",
     "test": "ava",
     "universal": "napi universal",
