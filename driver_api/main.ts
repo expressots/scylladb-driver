@@ -1,4 +1,4 @@
-import { Cluster } from "./index";
+import { Cluster } from "./lib/index";
 
 async function main() {
   const cluster = new Cluster({
