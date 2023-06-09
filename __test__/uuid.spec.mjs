@@ -1,6 +1,6 @@
 import test from "ava";
 
-import { Uuid } from "../index.js";
+import { Uuid } from "../driver_api/lib/index.js";
 
 test("Create a random UUID", (t) => {
   const uuid = Uuid.randomUuidv4();
