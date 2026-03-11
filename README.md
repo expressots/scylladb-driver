@@ -1,7 +1,7 @@
-Scylla Nodejs Driver
+Scylla Nodejs Driver Alternative for ExpressoTS
 ====================
 
-A modern, fully feature scylladb driver for Nodejs developed using Node Native API.
+A modern, fully feature scylladb driver expressoTS compatible, for Nodejs and developed using Node Native API.
 
 The driver supports Node versions 18.X and above.
 
