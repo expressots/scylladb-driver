@@ -9,12 +9,16 @@ use crate::session::query_result::{query_result_from_scylla, QueryResult};
 use crate::types::cql_json::json_to_bind_value;
 
 #[napi(object)]
+/// One statement entry added to a {@link ScyllaBatchStatement}.
 pub struct BatchStatement {
+  /// CQL query with `?` bind markers.
   pub query: String,
+  /// Bind values for this statement.
   pub params: Option<Vec<serde_json::Value>>,
 }
 
 #[napi]
+/// Builder for CQL batch statements (logged, unlogged, or counter).
 pub struct ScyllaBatchStatement {
   session: Arc<Session>,
   batch_type: BatchType,
@@ -32,12 +36,14 @@ impl ScyllaBatchStatement {
   }
 
   #[napi]
+  /// Adds a statement to the batch. Returns `this` for chaining.
   pub fn add(&mut self, statement: BatchStatement) -> &Self {
     self.statements.push(statement);
     self
   }
 
   #[napi]
+  /// Sends the batch to the cluster.
   pub async fn execute(&self) -> napi::Result<QueryResult> {
     let mut batch = Batch::new(self.batch_type);
     let mut all_values: Vec<Vec<Option<CqlValue>>> = Vec::new();

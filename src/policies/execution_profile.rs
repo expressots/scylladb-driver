@@ -12,25 +12,41 @@ use scylla::policies::speculative_execution::{
 use crate::error::driver_error;
 use crate::session::scylla_session::{parse_consistency, parse_serial_consistency};
 
+/// Simple speculative execution: retry on additional nodes after a fixed delay.
+/// See [Simple speculative execution](https://rust-driver.docs.scylladb.com/stable/speculative_execution/simple-speculative-execution.html).
 #[napi(object)]
 pub struct SpeculativeExecutionConfig {
+  /// Maximum number of speculative attempts.
   pub max_retry_count: u32,
+  /// Delay between speculative attempts in milliseconds.
   pub retry_interval_ms: u32,
 }
 
+/// Percentile-based speculative execution policy configuration.
+/// See [Percentile speculative execution](https://rust-driver.docs.scylladb.com/stable/speculative_execution/percentile-speculative-execution.html).
 #[napi(object)]
 pub struct PercentileSpeculativeConfig {
+  /// Maximum number of speculative attempts.
   pub max_retry_count: u32,
+  /// Latency percentile threshold (0.0 to 100.0).
   pub percentile: f64,
 }
 
+/// Groups execution settings (consistency, timeout, retry, speculative execution).
+/// See [Execution profiles](https://rust-driver.docs.scylladb.com/stable/execution_profiles/execution_profiles.html).
 #[napi(object)]
 pub struct ExecutionProfileConfig {
+  /// Default consistency: `one`, `quorum`, `local_quorum`, `local_one`, etc.
   pub consistency: Option<String>,
+  /// Serial consistency for lightweight transactions: `serial` or `local_serial`.
   pub serial_consistency: Option<String>,
+  /// Per-statement request timeout in milliseconds.
   pub request_timeout_ms: Option<u32>,
+  /// Retry policy: `default`, `downgrading_consistency`, or `fallthrough`.
   pub retry_policy: Option<String>,
+  /// Fixed-delay speculative execution policy.
   pub speculative_execution: Option<SpeculativeExecutionConfig>,
+  /// Percentile-based speculative execution policy (mutually exclusive with `speculativeExecution`).
   pub percentile_speculative_execution: Option<PercentileSpeculativeConfig>,
 }
 

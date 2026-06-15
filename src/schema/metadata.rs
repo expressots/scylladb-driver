@@ -6,6 +6,7 @@ use scylla::cluster::ClusterState;
 use crate::error::driver_error;
 
 #[napi(object)]
+/// Keyspace metadata from the driver schema cache.
 pub struct KeyspaceInfo {
   pub name: String,
   pub strategy: String,
@@ -16,6 +17,7 @@ pub struct KeyspaceInfo {
 }
 
 #[napi(object)]
+/// Column metadata within a table or view.
 pub struct ColumnInfo {
   pub name: String,
   pub type_name: String,
@@ -23,6 +25,7 @@ pub struct ColumnInfo {
 }
 
 #[napi(object)]
+/// Table metadata including partition and clustering keys.
 pub struct TableInfo {
   pub name: String,
   pub partition_key: Vec<String>,
@@ -32,6 +35,7 @@ pub struct TableInfo {
 }
 
 #[napi(object)]
+/// Materialized view metadata.
 pub struct MaterializedViewInfo {
   pub name: String,
   pub base_table_name: String,
@@ -41,12 +45,14 @@ pub struct MaterializedViewInfo {
 }
 
 #[napi(object)]
+/// Field metadata within a user-defined type.
 pub struct UdtFieldInfo {
   pub name: String,
   pub type_name: String,
 }
 
 #[napi(object)]
+/// User-defined type (UDT) metadata.
 pub struct UserDefinedTypeInfo {
   pub name: String,
   pub keyspace: String,

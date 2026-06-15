@@ -4,48 +4,75 @@ use scylla::value::{CqlValue, Row};
 use crate::error::driver_error;
 use crate::types::cql_json::cql_value_to_json;
 
+/// Metadata for one column in a query result set.
 #[napi(object)]
 pub struct ColumnSpec {
+  /// Column name.
   pub name: String,
+  /// CQL type name as reported by the server.
   pub type_name: String,
 }
 
+/// Result of a CQL statement that returns rows or an LWT outcome.
 #[napi(object)]
 pub struct QueryResult {
+  /// Result rows as plain objects keyed by column name.
   pub rows: Vec<serde_json::Value>,
+  /// Number of rows in this result page.
   pub row_length: u32,
+  /// Column metadata for the result set.
   pub columns: Vec<ColumnSpec>,
+  /// For lightweight transactions: whether the condition was applied. Undefined when not an LWT result.
   pub was_applied: Option<bool>,
+  /// Tracing session id when tracing was enabled. Undefined when tracing was not requested.
   pub tracing_id: Option<String>,
 }
 
+/// One page of a manually paged query from {@link ScyllaSession.querySinglePage}.
 #[napi(object)]
 pub struct PagedQueryResult {
+  /// Rows in this page.
   pub rows: Vec<serde_json::Value>,
+  /// Number of rows in this page.
   pub row_length: u32,
+  /// Column metadata for the result set.
   pub columns: Vec<ColumnSpec>,
+  /// LWT outcome when applicable.
   pub was_applied: Option<bool>,
+  /// Opaque token for the next page. Undefined when there are no more pages.
   pub next_page_token: Option<Vec<u8>>,
+  /// Tracing session id when tracing was enabled.
   pub tracing_id: Option<String>,
 }
 
+/// One connection attempt recorded in query execution history.
 #[napi(object)]
 pub struct AttemptHistoryInfo {
+  /// Node address used for this attempt.
   pub node_address: String,
+  /// Whether the attempt succeeded.
   pub success: Option<bool>,
+  /// Error message when the attempt failed.
   pub error: Option<String>,
 }
 
+/// Retry and speculative-execution history for one request.
 #[napi(object)]
 pub struct RequestHistoryInfo {
+  /// Non-speculative retry attempts.
   pub attempts: Vec<AttemptHistoryInfo>,
+  /// Speculative execution attempts.
   pub speculative_attempts: Vec<AttemptHistoryInfo>,
+  /// Whether the overall request succeeded.
   pub success: Option<bool>,
 }
 
+/// Query result paired with execution history from {@link ScyllaSession.executeWithHistory}.
 #[napi(object)]
 pub struct QueryWithHistory {
+  /// The query result.
   pub result: QueryResult,
+  /// Per-request execution history entries.
   pub history: Vec<RequestHistoryInfo>,
 }
 
