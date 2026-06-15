@@ -7,12 +7,6 @@ Requires **Node.js 18+**.
 ## Installation
 
 ```bash
-npm install scylladb-driver@preview
-```
-
-When `1.0.0` is released:
-
-```bash
 npm install scylladb-driver
 ```
 

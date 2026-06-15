@@ -1,6 +1,6 @@
 {
   "name": "scylladb-driver",
-  "version": "1.0.0-preview.1",
+  "version": "1.0.0",
   "description": "High-performance ScyllaDB/Cassandra CQL driver for Node.js, built on the official Rust driver via NAPI",
   "main": "index.js",
   "types": "index.d.ts",
