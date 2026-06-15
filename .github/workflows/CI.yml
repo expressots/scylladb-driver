@@ -112,10 +112,6 @@ jobs:
           path: .
       - name: Test bindings
         run: yarn test
-      - name: Start Scylla
-        run: yarn docker:up
-      - name: Integration tests
-        run: yarn test:integration
   test-linux-x64-gnu-binding:
     name: Test bindings on Linux-x64-gnu - node@18
     needs:

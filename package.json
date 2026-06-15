@@ -64,7 +64,7 @@
     "dev": "tsnd --respawn --transpile-only --no-notify ./driver_api/main.ts",
     "docker:up": "docker compose -f docker/docker-compose.yml up -d --wait",
     "docker:down": "docker compose -f docker/docker-compose.yml down -v",
-    "pack:ci": "napi prepublish -t npm && npm pack && node scripts/verify-pack.mjs",
+    "pack:ci": "node scripts/pack-prepare.mjs && npm pack && node scripts/verify-pack.mjs",
     "pack:local": "yarn build && yarn pack:ci",
     "prepublishOnly": "napi prepublish -t npm",
     "publish:preview": "bash scripts/publish-preview.sh",
