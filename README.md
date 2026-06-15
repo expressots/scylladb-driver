@@ -1,24 +1,30 @@
 # ScyllaDB TypeScript Driver
 
-A high-performance ScyllaDB/Cassandra CQL driver for Node.js, built on the official [Rust driver](https://rust-driver.docs.scylladb.com/stable/) via NAPI for native shard-aware performance.
+High-performance ScyllaDB and Apache Cassandra CQL driver for Node.js, built on the official [ScyllaDB Rust driver](https://rust-driver.docs.scylladb.com/stable/) via NAPI.
 
-Supports Node.js 18+.
+Requires **Node.js 18+**.
 
 ## Installation
-
-Stable (once released):
-
-```bash
-npm install scylladb-driver
-```
-
-Preview (`1.0.0-preview.x`):
 
 ```bash
 npm install scylladb-driver@preview
 ```
 
-## Quick Start
+When `1.0.0` is released:
+
+```bash
+npm install scylladb-driver
+```
+
+npm installs the correct native binary for your platform automatically:
+
+| Platform | npm package |
+|----------|-------------|
+| Linux x64 (glibc) | `scylladb-driver-linux-x64-gnu` |
+| macOS x64 | `scylladb-driver-darwin-x64` |
+| Windows x64 | `scylladb-driver-win32-x64-msvc` |
+
+## Quick start
 
 ```typescript
 import { Cluster } from "scylladb-driver";
@@ -30,57 +36,60 @@ const cluster = new Cluster({
 
 const session = await cluster.connect();
 
-// Simple query
-const result = await session.execute("SELECT * FROM system.local");
-
-// Parameterized query
-await session.execute(
-  "INSERT INTO my_table (id, name) VALUES (?, ?)",
-  [1, "hello"]
-);
-
-// Prepared statement (server-side caching)
-const prepared = await session.prepare(
-  "INSERT INTO my_table (id, name) VALUES (?, ?)"
-);
-await prepared.execute([2, "world"]);
+const result = await session.execute("SELECT release FROM system.local");
+console.log(result.rows[0]);
 ```
 
-## Features
+## TypeScript helpers
 
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Async connect and query | Done | Full async/await API |
-| Shard-aware routing | Done | Automatic via Rust driver |
-| Prepared statements | Done | `session.prepare()` / `prepared.execute()` |
-| Batch statements | Done | Logged, unlogged, counter |
-| Paging | Done | `session.querySinglePage()` with token |
-| Lightweight transactions (LWT) | Done | `wasApplied` on results |
-| Keyspace switching | Done | `session.useKeyspace()` |
-| Schema agreement | Done | `session.awaitSchemaAgreement()` |
-| Execution profiles | Done | Consistency, timeout, retry, speculative exec |
-| Retry policies | Done | Default, downgrading consistency, fallthrough |
-| Speculative execution | Done | Simple speculative policy |
-| Load balancing | Done | Datacenter-aware via Rust driver default policy |
-| All CQL data types | Done | Scalars, lists, sets, maps, tuples, blobs, UDTs |
-| Schema metadata | Done | `getKeyspaces()`, `getTable()`, `refreshMetadata()` |
-| Metrics | Done | `session.getMetrics()` |
-| Query tracing | Done | `tracingId` on results, `getTracingInfo()` |
-| Compression | Done | LZ4, Snappy |
-| Authentication | Done | Username/password |
-| TLS | Done | `rustls` via `tls.caFilepath` on `ClusterConfig` |
-| Connection pool tuning | Done | Timeout, TCP keepalive, nodelay |
-| Query execution history | Done | `session.executeWithHistory()` |
-| Async paging (all pages) | Done | `session.executePaged()` |
-| CDC consumer | Out of scope | Separate track; CQL driver only |
-| Sync API | Not planned | Async-only (matches Rust/Python drivers) |
-| Alternator (DynamoDB API) | Out of scope | Separate package recommended |
-
-## Configuration
+Optional typed helpers are available from the secondary entry point:
 
 ```typescript
-import { Cluster } from "scylladb-driver";
+import { Cluster, getFirstRow } from "scylladb-driver/ts";
 
+const session = await new Cluster({ nodes: ["127.0.0.1:9042"] }).connect();
+const row = getFirstRow(await session.execute("SELECT release FROM system.local"));
+```
+
+## Examples
+
+### Prepared statements
+
+```typescript
+const prepared = await session.prepare(
+  "INSERT INTO users (id, name) VALUES (?, ?)"
+);
+await prepared.execute([1, "Alice"]);
+```
+
+### Paging
+
+```typescript
+let token: Buffer | null = null;
+do {
+  const page = await session.querySinglePage(
+    "SELECT * FROM large_table",
+    null,
+    100,
+    token
+  );
+  console.log(page.rows);
+  token = page.nextPageToken ?? null;
+} while (token);
+```
+
+### Batch statements
+
+```typescript
+const batch = session.batch("logged");
+batch.add({ query: "INSERT INTO t (id, val) VALUES (?, ?)", params: [1, "a"] });
+batch.add({ query: "INSERT INTO t (id, val) VALUES (?, ?)", params: [2, "b"] });
+await batch.execute();
+```
+
+### Configuration
+
+```typescript
 const cluster = new Cluster({
   nodes: ["10.0.0.1:9042", "10.0.0.2:9042"],
   username: "admin",
@@ -89,110 +98,36 @@ const cluster = new Cluster({
   defaultKeyspace: "my_app",
   localDatacenter: "us-east-1",
   connectionTimeoutMs: 5000,
-  tcpNodelay: true,
-  tcpKeepaliveIntervalMs: 30000,
-  disallowShardAwarePort: false,
-  schemaAgreementTimeoutMs: 30000,
   executionProfile: {
     consistency: "local_quorum",
     requestTimeoutMs: 10000,
     retryPolicy: "default",
-    speculativeExecution: {
-      maxRetryCount: 2,
-      retryIntervalMs: 100,
-    },
   },
 });
 ```
 
-## Paging
+## Features
 
-```typescript
-let pagingState = null;
-do {
-  const page = await session.querySinglePage(
-    "SELECT * FROM large_table",
-    null,
-    100, // page size
-    pagingState
-  );
-  console.log(page.rows);
-  pagingState = page.nextPageToken;
-} while (pagingState);
-```
+- Async connect and query API
+- Shard-aware routing (via the Rust driver)
+- Prepared, batch, and paged queries
+- Lightweight transactions (`wasApplied` on results)
+- Execution profiles, retry policies, speculative execution
+- TLS, compression (LZ4, Snappy), authentication
+- Schema metadata, metrics, query tracing, execution history
+- CQL scalar and collection types (lists, maps, sets, tuples, UDTs, blobs)
 
-## Batch Statements
+For advanced topics (load balancing, retry policies, data types, tracing), see the [Rust driver documentation](https://rust-driver.docs.scylladb.com/stable/). This package mirrors that API surface for Node.js.
 
-```typescript
-const batch = session.batch("logged"); // "logged" | "unlogged" | "counter"
-batch.add({ query: "INSERT INTO t (id, val) VALUES (?, ?)", params: [1, "a"] });
-batch.add({ query: "INSERT INTO t (id, val) VALUES (?, ?)", params: [2, "b"] });
-await batch.execute();
-```
+## Contributing
 
-## Schema Introspection
-
-```typescript
-const keyspaces = session.getKeyspaces();
-const table = session.getTable("my_keyspace", "my_table");
-console.log(table.partitionKey, table.clusteringKey, table.columns);
-```
-
-## Metrics and Tracing
-
-```typescript
-const metrics = session.getMetrics();
-console.log(`Queries: ${metrics.queriesNum}, Errors: ${metrics.errorsNum}`);
-
-const result = await session.execute("SELECT ...", null, { tracing: true });
-const info = await session.getTracingInfo(result.tracingId);
-console.log(info.coordinator, info.durationUs, info.events);
-```
-
-## Development
-
-```bash
-# Start ScyllaDB
-yarn docker:up
-
-# Build native bindings
-yarn build:debug
-
-# Run unit tests
-yarn test
-
-# Run integration tests (requires ScyllaDB running)
-yarn test:integration
-
-# Run all tests
-yarn test:all
-
-# Stop ScyllaDB
-yarn docker:down
-```
-
-## Publishing
-
-See [PUBLISHING.md](PUBLISHING.md) for the full release guide, including the **1.0.0-preview.1** launch checklist.
-
-Quick reference:
-
-```bash
-yarn pack:local          # build + pack + verify tarball locally
-yarn pack:ci             # pack + verify (CI, after artifacts)
-```
-
-CI runs `pack-check` on every build and publishes to npm when the latest commit message is a semver version (preview releases use the `preview` dist-tag).
-
-## Architecture
-
-This driver wraps the official [scylla-rust-driver](https://github.com/scylladb/scylla-rust-driver) (v1.7) through Node.js NAPI bindings. The Rust layer handles CQL protocol, connection pooling, shard-aware routing, and serialization. The TypeScript layer provides ergonomic APIs and type safety.
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## References
 
-- [ScyllaDB Drivers Product Page](https://www.scylladb.com/product/scylla-drivers/)
-- [Rust Driver Documentation](https://rust-driver.docs.scylladb.com/stable/)
-- [ScyllaDB CQL Reference](https://docs.scylladb.com/stable/cql/)
+- [ScyllaDB Rust Driver docs](https://rust-driver.docs.scylladb.com/stable/)
+- [ScyllaDB CQL reference](https://docs.scylladb.com/stable/cql/)
+- [ScyllaDB drivers overview](https://www.scylladb.com/product/scylla-drivers/)
 
 ## License
 

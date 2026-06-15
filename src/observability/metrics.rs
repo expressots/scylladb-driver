@@ -3,17 +3,30 @@ use std::sync::Arc;
 use scylla::observability::metrics::Metrics;
 
 #[napi(object)]
+/// Driver performance and connection statistics.
+/// See [Driver metrics](https://rust-driver.docs.scylladb.com/stable/metrics/metrics.html).
 pub struct DriverMetrics {
+  /// Total number of queries executed.
   pub queries_num: u32,
+  /// Total number of query errors.
   pub errors_num: u32,
+  /// Total number of paged query iterators started.
   pub queries_iter_num: u32,
+  /// Total number of paged query iterator errors.
   pub errors_iter_num: u32,
+  /// Total number of query retries.
   pub retries_num: u32,
+  /// Average query latency in milliseconds.
   pub latency_avg_ms: Option<u32>,
+  /// 99th percentile latency in milliseconds.
   pub latency_p99_ms: Option<u32>,
+  /// 95th percentile latency in milliseconds.
   pub latency_p95_ms: Option<u32>,
+  /// Current total open connections.
   pub total_connections: u32,
+  /// Number of connection timeouts.
   pub connection_timeouts: u32,
+  /// Number of request timeouts.
   pub request_timeouts: u32,
 }
 

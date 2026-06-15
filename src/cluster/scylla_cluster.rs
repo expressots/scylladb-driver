@@ -17,6 +17,9 @@ use crate::session::scylla_session::ScyllaSession;
 use super::cluster_config::ClusterConfig;
 
 #[napi(js_name = "Cluster")]
+/// Entry point for connecting to a ScyllaDB or Cassandra cluster.
+///
+/// Create a `Cluster` with {@link ClusterConfig}, then call {@link Cluster.connect} to obtain a {@link ScyllaSession}.
 pub struct ScyllaCluster {
   config: ClusterConfig,
 }
@@ -24,6 +27,7 @@ pub struct ScyllaCluster {
 #[napi]
 impl ScyllaCluster {
   #[napi(constructor)]
+  /// Creates a cluster handle from the given configuration. Does not open connections yet.
   pub fn new(config: ClusterConfig) -> napi::Result<Self> {
     if config.nodes.is_empty() {
       return Err(driver_error("At least one node is required"));
@@ -33,6 +37,9 @@ impl ScyllaCluster {
   }
 
   #[napi]
+  /// Opens a connection pool and returns a session.
+  ///
+  /// @param keyspace - Optional keyspace override. Uses `defaultKeyspace` from config when omitted.
   pub async fn connect(&self, keyspace: Option<String>) -> napi::Result<ScyllaSession> {
     let mut builder = SessionBuilder::new().known_nodes(&self.config.nodes);
 

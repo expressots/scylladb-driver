@@ -1,5 +1,8 @@
 use tracing_subscriber::EnvFilter;
 
+/// Initializes Rust driver logging to stderr.
+///
+/// @param level - tracing filter string (default: `scylla=info`). See [Logging](https://rust-driver.docs.scylladb.com/stable/logging/logging.html).
 #[napi]
 pub fn init_logging(level: Option<String>) {
   let filter = level.unwrap_or_else(|| "scylla=info".to_string());
