@@ -1,19 +1,25 @@
 [package]
 edition = "2021"
 name = "scylladb-driver"
-version = "0.0.0"
+version = "1.0.0-preview.1"
 
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
-# Default enable napi4 feature, see https://nodejs.org/api/n-api.html#node-api-version-matrix
 napi = { version = "2.12.2", default-features = false, features = ["napi8", "tokio_rt", "serde-json"] }
 napi-derive = "2.12.2"
-scylla = "0.8.1"
+scylla = { version = "1.6", features = ["metrics", "rustls-023"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 uuid = { version = "1.3.3", features = ["v4", "serde", "fast-rng"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+rustls = { version = "0.23", default-features = false, features = ["ring", "std"] }
+tokio-rustls = "0.26"
+rustls-pemfile = "2"
+webpki-roots = "1"
+futures = "0.3"
 
 [build-dependencies]
 napi-build = "2.0.1"

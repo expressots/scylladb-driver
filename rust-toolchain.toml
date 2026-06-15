@@ -1,0 +1,3 @@
+[toolchain]
+channel = "stable"
+min-version = "1.88.0"
