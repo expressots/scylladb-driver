@@ -1,13 +1,24 @@
-target
+# Rust / native build
+target/
 Cargo.lock
-.cargo
-.github
-npm
-.eslintrc
-.prettierignore
+Cargo.toml
+build.rs
+rust-toolchain.toml
 rustfmt.toml
-yarn.lock
 *.node
-.yarn
-__test__
-renovate.json
+
+# Dev / CI only
+.github/
+docker/
+driver_api/
+__test__/
+src/
+.yarn/
+.yarnrc.yml
+yarn.lock
+tsconfig.json
+
+# Misc
+*.tgz
+.env
+.env.*

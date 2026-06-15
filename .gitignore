@@ -197,4 +197,5 @@ Cargo.lock
 *.node
 
 # build files
-index.*
+/index.js
+/index.d.ts

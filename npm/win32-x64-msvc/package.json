@@ -1,6 +1,6 @@
 {
   "name": "scylladb-driver-win32-x64-msvc",
-  "version": "0.0.0",
+  "version": "1.0.0-preview.1",
   "os": [
     "win32"
   ],
@@ -13,6 +13,6 @@
   ],
   "license": "MIT",
   "engines": {
-    "node": ">= 10"
+    "node": ">= 18"
   }
 }
