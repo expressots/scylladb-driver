@@ -199,3 +199,5 @@ Cargo.lock
 # build files
 /index.js
 /index.d.ts
+
+release-artifacts/

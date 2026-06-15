@@ -66,7 +66,7 @@
     "docker:down": "docker compose -f docker/docker-compose.yml down -v",
     "pack:ci": "node scripts/pack-prepare.mjs && npm pack && node scripts/verify-pack.mjs",
     "pack:local": "yarn build && yarn pack:ci",
-    "prepublishOnly": "napi prepublish -t npm",
+    "prepublishOnly": "node scripts/pack-prepare.mjs",
     "publish:preview": "bash scripts/publish-preview.sh",
     "test": "ava __test__/uuid.spec.mjs",
     "test:integration": "ava __test__/integration/**/*.mjs",
