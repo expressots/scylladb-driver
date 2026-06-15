@@ -201,3 +201,6 @@ Cargo.lock
 /index.d.ts
 
 release-artifacts/
+
+
+.cursor/
