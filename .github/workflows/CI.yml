@@ -207,9 +207,10 @@ jobs:
       - name: Publish
         run: |
           set -euo pipefail
+          NPM_REGISTRY="https://registry.npmjs.org/"
+          export npm_config_registry="$NPM_REGISTRY"
           MSG="$(git log -1 --pretty=%B | head -1 | tr -d '\r')"
           echo "Release commit message: $MSG"
-          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
           if echo "$MSG" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
             TAG=""
           elif echo "$MSG" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+-preview(\.[0-9]+)?$'; then
@@ -220,19 +221,25 @@ jobs:
             echo "Not a release commit, skipping publish"
             exit 0
           fi
-          napi prepublish -t npm
+          if [ -z "${NPM_TOKEN:-}" ]; then
+            echo "::error::NPM_TOKEN secret is required to publish release commits."
+            exit 1
+          fi
+          echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+          echo "Preparing package.json optionalDependencies..."
+          node scripts/pack-prepare.mjs
           for dir in npm/*; do
             echo "Publishing $(basename "$dir")..."
             if [ -n "$TAG" ]; then
-              (cd "$dir" && npm publish --access public --tag "$TAG")
+              (cd "$dir" && npm publish --registry "$NPM_REGISTRY" --access public --tag "$TAG")
             else
-              (cd "$dir" && npm publish --access public)
+              (cd "$dir" && npm publish --registry "$NPM_REGISTRY" --access public)
             fi
           done
           if [ -n "$TAG" ]; then
-            npm publish --access public --tag "$TAG"
+            npm publish --registry "$NPM_REGISTRY" --access public --tag "$TAG"
           else
-            npm publish --access public
+            npm publish --registry "$NPM_REGISTRY" --access public
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
