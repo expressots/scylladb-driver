@@ -11,6 +11,7 @@ use crate::session::scylla_session::{parse_consistency, parse_serial_consistency
 use crate::types::cql_json::json_to_bind_value;
 
 #[napi]
+/// A server-prepared CQL statement for efficient repeated execution.
 pub struct ScyllaPreparedStatement {
   session: Arc<Session>,
   prepared: PreparedStatement,
@@ -23,11 +24,13 @@ impl ScyllaPreparedStatement {
   }
 
   #[napi]
+  /// Returns the original CQL text used to prepare this statement.
   pub fn get_query(&self) -> String {
     self.prepared.get_statement().to_string()
   }
 
   #[napi]
+  /// Executes the prepared statement with optional bind values and execution options.
   pub async fn execute(
     &self,
     parameters: Option<Vec<serde_json::Value>>,
@@ -73,6 +76,7 @@ impl ScyllaPreparedStatement {
   }
 
   #[napi]
+  /// Sets the default consistency for this prepared statement.
   pub fn set_consistency(&mut self, consistency: String) -> napi::Result<()> {
     self
       .prepared
@@ -81,6 +85,7 @@ impl ScyllaPreparedStatement {
   }
 
   #[napi]
+  /// Sets the serial consistency for lightweight transactions on this statement.
   pub fn set_serial_consistency(
     &mut self,
     serial_consistency: String,
@@ -92,11 +97,13 @@ impl ScyllaPreparedStatement {
   }
 
   #[napi]
+  /// Marks whether this statement is safe to retry.
   pub fn set_idempotent(&mut self, is_idempotent: bool) {
     self.prepared.set_is_idempotent(is_idempotent);
   }
 
   #[napi]
+  /// Enables or disables server-side tracing for this prepared statement.
   pub fn set_tracing(&mut self, tracing: bool) {
     self.prepared.set_tracing(tracing);
   }

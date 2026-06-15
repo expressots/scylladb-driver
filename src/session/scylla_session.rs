@@ -24,6 +24,9 @@ use crate::statement::prepared::{prepare_statement, ScyllaPreparedStatement};
 use crate::types::cql_json::json_to_bind_value;
 
 #[napi]
+/// An active connection to a ScyllaDB or Cassandra cluster.
+///
+/// Obtain a session from {@link Cluster.connect}. A session is cheap to share across your application.
 pub struct ScyllaSession {
   session: Arc<Session>,
 }
@@ -41,6 +44,11 @@ impl ScyllaSession {
   }
 
   #[napi]
+  /// Executes a CQL statement and returns all rows in a single response (unpaged).
+  ///
+  /// @param query - CQL query string with `?` placeholders for bind markers.
+  /// @param parameters - Bind values as JSON-compatible values (see Rust driver data types docs).
+  /// @param options - Optional per-statement settings (consistency, tracing, profile, etc.).
   pub async fn execute(
     &self,
     query: String,
@@ -94,6 +102,7 @@ impl ScyllaSession {
   }
 
   #[napi]
+  /// Switches the session keyspace (`USE keyspace` equivalent).
   pub async fn use_keyspace(
     &self,
     keyspace: String,
@@ -107,6 +116,7 @@ impl ScyllaSession {
   }
 
   #[napi]
+  /// Waits until cluster nodes agree on the current schema version. Returns the schema version UUID.
   pub async fn await_schema_agreement(&self) -> napi::Result<String> {
     let uuid = self
       .session
@@ -117,6 +127,7 @@ impl ScyllaSession {
   }
 
   #[napi]
+  /// Returns the current schema version UUID if all nodes agree, or `null` if they do not.
   pub async fn check_schema_agreement(&self) -> napi::Result<Option<String>> {
     let result = self
       .session
@@ -127,12 +138,14 @@ impl ScyllaSession {
   }
 
   #[napi]
+  /// Prepares a CQL statement on the server for efficient repeated execution.
   pub async fn prepare(&self, query: String) -> napi::Result<ScyllaPreparedStatement> {
     let prepared = prepare_statement(&self.session, &query).await?;
     Ok(ScyllaPreparedStatement::new(self.session.clone(), prepared))
   }
 
   #[napi]
+  /// Creates a batch builder. @param batchType - `logged`, `unlogged`, or `counter` (default: `logged`).
   pub fn batch(&self, batch_type: Option<String>) -> napi::Result<ScyllaBatchStatement> {
     let bt = match &batch_type {
       Some(t) => parse_batch_type(t)?,
@@ -142,6 +155,7 @@ impl ScyllaSession {
   }
 
   #[napi]
+  /// Fetches a single page of results. Pass `nextPageToken` from a previous page to continue.
   pub async fn query_single_page(
     &self,
     query: String,
@@ -199,6 +213,7 @@ impl ScyllaSession {
   }
 
   #[napi]
+  /// Fetches all pages of a query automatically and returns the combined rows.
   pub async fn execute_paged(
     &self,
     query: String,
@@ -278,16 +293,19 @@ impl ScyllaSession {
   }
 
   #[napi]
+  /// Returns metadata for all keyspaces known to the driver.
   pub fn get_keyspaces(&self) -> Vec<KeyspaceInfo> {
     get_keyspaces_from_session(&self.session)
   }
 
   #[napi]
+  /// Returns table metadata for the given keyspace and table name.
   pub fn get_table(&self, keyspace: String, table: String) -> napi::Result<TableInfo> {
     get_table_from_session(&self.session, &keyspace, &table)
   }
 
   #[napi]
+  /// Returns materialized view metadata.
   pub fn get_materialized_view(
     &self,
     keyspace: String,
@@ -297,6 +315,7 @@ impl ScyllaSession {
   }
 
   #[napi]
+  /// Returns user-defined type (UDT) metadata.
   pub fn get_user_defined_type(
     &self,
     keyspace: String,
@@ -306,6 +325,7 @@ impl ScyllaSession {
   }
 
   #[napi]
+  /// Refreshes cluster metadata from the server (keyspaces, tables, types, views).
   pub async fn refresh_metadata(&self) -> napi::Result<()> {
     self
       .session
@@ -315,6 +335,7 @@ impl ScyllaSession {
   }
 
   #[napi]
+  /// Executes a query and returns the result together with retry/speculative execution history.
   pub async fn execute_with_history(
     &self,
     query: String,
@@ -396,11 +417,13 @@ impl ScyllaSession {
   }
 
   #[napi]
+  /// Returns driver metrics (query counts, latencies, connection stats).
   pub fn get_metrics(&self) -> DriverMetrics {
     extract_metrics(&self.session.get_metrics())
   }
 
   #[napi]
+  /// Fetches detailed tracing information for a tracing session id from {@link QueryResult.tracingId}.
   pub async fn get_tracing_info(&self, tracing_id: String) -> napi::Result<QueryTracingInfo> {
     get_tracing_info(&self.session, &tracing_id).await
   }

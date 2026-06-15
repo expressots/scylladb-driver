@@ -7,6 +7,7 @@ use uuid::Uuid;
 use crate::error::driver_error;
 
 #[napi(object)]
+/// One event in a query trace timeline.
 pub struct TracingEvent {
   pub event_id: String,
   pub activity: Option<String>,
@@ -16,6 +17,8 @@ pub struct TracingEvent {
 }
 
 #[napi(object)]
+/// Detailed tracing information for a traced query.
+/// See [Query tracing](https://rust-driver.docs.scylladb.com/stable/tracing/tracing.html).
 pub struct QueryTracingInfo {
   pub client: Option<String>,
   pub command: Option<String>,
