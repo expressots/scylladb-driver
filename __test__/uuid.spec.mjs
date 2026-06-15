@@ -1,6 +1,6 @@
 import test from "ava";
 
-import { Uuid } from "../driver_api/lib/index.js";
+import { Uuid } from "../index.js";
 
 test("Create a random UUID", (t) => {
   const uuid = Uuid.randomUuidv4();
@@ -13,15 +13,11 @@ test("Create a UUID from a string", (t) => {
 });
 
 test("Should error on creating UUID from malformed string", (t) => {
-  const error = t.throws(
-    () => {
-      throw Uuid.fromString("123e4567-e89b-12d3-a456-42661417400");
-    },
-    { instanceOf: Error }
-  );
+  const result = Uuid.fromString("123e4567-e89b-12d3-a456-42661417400");
 
+  t.true(result instanceof Error);
   t.is(
-    error.message,
+    result.message,
     "Failed to parse UUID: invalid group length in group 4: expected 12, found 11"
   );
 });
