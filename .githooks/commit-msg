@@ -1,0 +1,10 @@
+#!/bin/sh
+# Strip Cursor co-author trailers so cursoragent never appears in commit history.
+
+msg_file="$1"
+tmp="$(mktemp)"
+
+grep -viE '^co-authored-by:.*cursor(agent)?@cursor\.com' "$msg_file" > "$tmp" || true
+mv "$tmp" "$msg_file"
+
+exit 0
